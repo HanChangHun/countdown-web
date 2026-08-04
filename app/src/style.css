@@ -206,12 +206,6 @@ body.sidebar-open .sidebar { transform: translateX(0); }
   transition: background 0.3s, border-color 0.3s, color 0.3s;
 }
 
-.badge[data-state="started"] {
-  background: rgba(244, 114, 182, 0.14);
-  border-color: rgba(244, 114, 182, 0.35);
-  color: #fbcfe8;
-}
-
 h1 {
   position: relative;
   display: block;
