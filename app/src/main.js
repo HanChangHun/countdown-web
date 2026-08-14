@@ -89,7 +89,8 @@ function readInputsToMs() {
   const [y, m, d] = dv.split('-').map(Number);
   const h = Number($('hourInput').value);
   const min = Number($('minuteInput').value);
-  const t = new Date(y, m - 1, d, h, min, 0, 0).getTime();
+  const s = Number($('secondInput').value);
+  const t = new Date(y, m - 1, d, h, min, s, 0).getTime();
   return Number.isFinite(t) ? t : null;
 }
 
@@ -98,6 +99,7 @@ function writeMsToInputs(ms) {
   $('dateInput').value = toDateInputValue(ms);
   $('hourInput').value = String(d.getHours());
   setMinuteValue(d.getMinutes());
+  $('secondInput').value = String(d.getSeconds());
 }
 
 // Select the given minute, injecting a one-off <option> when the target is off
@@ -131,6 +133,13 @@ function populateSelectOptions() {
     opt.value = String(m);
     opt.textContent = pad(m);
     minSel.appendChild(opt);
+  }
+  const secSel = $('secondInput');
+  for (let s = 0; s < 60; s++) {
+    const opt = document.createElement('option');
+    opt.value = String(s);
+    opt.textContent = pad(s);
+    secSel.appendChild(opt);
   }
 }
 
@@ -185,10 +194,10 @@ function load() {
   const sel = selected();
   if (at) {
     const ms = Date.parse(at);
-    if (Number.isFinite(ms)) sel.targetMs = Math.floor(ms / 60000) * 60000;
+    if (Number.isFinite(ms)) sel.targetMs = Math.floor(ms / 1000) * 1000;
   } else if (t) {
     const ms = Number(t);
-    if (Number.isFinite(ms) && ms > 0) sel.targetMs = Math.floor(ms / 60000) * 60000;
+    if (Number.isFinite(ms) && ms > 0) sel.targetMs = Math.floor(ms / 1000) * 1000;
   }
   if (title != null) sel.title = title.trim();
 }
@@ -326,7 +335,8 @@ function updateMeta(ms) {
     return;
   }
   const target = new Date(ms);
-  $('metaTarget').textContent = fmtDateTime(target);
+  const tSec = target.getSeconds();
+  $('metaTarget').textContent = fmtDateTime(target) + (tSec ? `:${pad(tSec)}` : '');
   $('metaNow').textContent = isSameDay(target, now)
     ? fmtTimeWithSeconds(now)
     : `${fmtDateTime(now)}:${pad(now.getSeconds())}`;
@@ -451,11 +461,11 @@ $('setBtn').addEventListener('click', () => {
   const ms = readInputsToMs();
   if (ms == null) return;
   const sel = selected();
-  // Pressing Set without changing the controls (same minute as the current
-  // target) keeps the exact existing target, so seconds set by a preset aren't
-  // silently zeroed.
+  // Pressing Set without changing the controls (same second as the current
+  // target) keeps the exact existing target, so sub-second precision from a
+  // preset isn't silently dropped.
   if (sel && sel.targetMs != null
-      && Math.floor(sel.targetMs / 60000) === Math.floor(ms / 60000)) {
+      && Math.floor(sel.targetMs / 1000) === Math.floor(ms / 1000)) {
     return;
   }
   setTargetForSelected(ms);

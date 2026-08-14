@@ -1,6 +1,6 @@
 [package]
 name = "countdown-app"
-version = "0.1.8"
+version = "0.1.9"
 description = "Countdown / stopwatch desktop app"
 authors = ["Han Changhun"]
 edition = "2021"
