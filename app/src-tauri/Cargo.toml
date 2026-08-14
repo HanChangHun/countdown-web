@@ -1,6 +1,6 @@
 [package]
 name = "countdown-app"
-version = "0.1.9"
+version = "0.1.10"
 description = "Countdown / stopwatch desktop app"
 authors = ["Han Changhun"]
 edition = "2021"
@@ -19,6 +19,7 @@ tauri-plugin-window-state = "2"
 tauri-plugin-opener = "2"
 tauri-plugin-updater = "2"
 tauri-plugin-process = "2"
+tauri-plugin-notification = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 

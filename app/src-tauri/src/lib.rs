@@ -18,6 +18,8 @@ pub fn run() {
         // Secure auto-update (signed GitHub releases) + relaunch after install.
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
+        // Desktop notification when a countdown hits zero.
+        .plugin(tauri_plugin_notification::init())
         .setup(|_app| {
             std::thread::spawn(cleanup_stale_updater_temp_dirs);
             Ok(())

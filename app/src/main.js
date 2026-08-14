@@ -396,9 +396,39 @@ function updateSidebarTimes() {
   }
 }
 
+// ---------- arrival notification (desktop / Tauri only) ----------
+// Notify once when a timer's target passes while the app is running. Only
+// targets first observed in the future can fire, so timers that are already
+// expired at launch (or set directly into the past) stay silent.
+let pendingArrivals = new Set();
+
+function notifyArrivals() {
+  const next = new Set();
+  const now = Date.now();
+  for (const t of timers) {
+    if (t.targetMs == null) continue;
+    const key = `${t.id}:${t.targetMs}`;
+    if (t.targetMs > now) next.add(key);
+    else if (pendingArrivals.has(key)) sendArrivalNotification(t);
+  }
+  pendingArrivals = next;
+}
+
+function sendArrivalNotification(t) {
+  const api = window.__TAURI__ && window.__TAURI__.notification;
+  if (!api) return;
+  Promise.resolve(api.isPermissionGranted())
+    .then((ok) => ok || api.requestPermission().then((p) => p === 'granted'))
+    .then((ok) => {
+      if (ok) api.sendNotification({ title: t.title || 'Countdown', body: 'Time\'s up!' });
+    })
+    .catch(() => { /* ignore */ });
+}
+
 // ---------- loop (1 Hz, always running) ----------
 function tick() {
   const grew = harvestPomodoro();
+  notifyArrivals();
   renderMain();
   renderPomoPile(grew);
   updateSidebarTimes();
@@ -615,6 +645,8 @@ async function checkForUpdates(manual) {
   if (window.__TAURI__ && window.__TAURI__.updater) {
     btn.addEventListener('click', () => checkForUpdates(true));
     checkForUpdates(false);   // silent check on startup
+    // The widget tends to stay open for days — re-check daily so updates land.
+    setInterval(() => checkForUpdates(false), 24 * 60 * 60 * 1000);
   } else {
     btn.hidden = true;        // plain browser (web build): no updater
   }
@@ -661,4 +693,19 @@ startLoop();
   const appWindow = window.__TAURI__.window.getCurrentWindow();
   document.getElementById('winMinBtn').addEventListener('click', () => appWindow.minimize());
   document.getElementById('winCloseBtn').addEventListener('click', () => appWindow.close());
+
+  // 📌 always-on-top pin — remembered across launches.
+  const PIN_KEY = 'ch-countdown:pin';
+  const pinBtn = document.getElementById('winPinBtn');
+  function applyPin(on) {
+    pinBtn.classList.toggle('on', on);
+    pinBtn.setAttribute('aria-pressed', String(on));
+    pinBtn.title = on ? 'Unpin from top' : 'Keep on top';
+    appWindow.setAlwaysOnTop(on);
+    try { localStorage.setItem(PIN_KEY, on ? '1' : '0'); } catch (e) { /* ignore */ }
+  }
+  pinBtn.addEventListener('click', () => applyPin(!pinBtn.classList.contains('on')));
+  let pinned = false;
+  try { pinned = localStorage.getItem(PIN_KEY) === '1'; } catch (e) { /* ignore */ }
+  if (pinned) applyPin(true);
 })();

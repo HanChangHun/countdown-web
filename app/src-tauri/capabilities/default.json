@@ -8,6 +8,8 @@
     "core:window:allow-start-dragging",
     "core:window:allow-minimize",
     "core:window:allow-close",
+    "core:window:allow-set-always-on-top",
+    "notification:default",
     "opener:allow-open-url",
     "updater:default",
     "updater:allow-check",

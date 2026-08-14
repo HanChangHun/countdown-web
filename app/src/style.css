@@ -720,6 +720,11 @@ button.ghost:hover {
 .win-btn:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
 .win-btn.close:hover { background: rgba(225, 29, 72, 0.85); color: #fff; }
 
+/* Always-on-top pin: gray when off, full color when pinned. */
+.win-btn.pin { font-size: 0.72rem; filter: grayscale(1); opacity: 0.5; }
+.win-btn.pin:hover { opacity: 0.85; }
+.win-btn.pin.on { filter: none; opacity: 1; }
+
 body { box-sizing: border-box; padding-top: var(--titlebar-h); }
 
 /* 브라우저(웹)로 열었을 때: 타이틀바 숨김 */
