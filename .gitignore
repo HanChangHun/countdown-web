@@ -1,6 +1,9 @@
 # Claude Code session metadata
 .claude/
 
+# oh-my-claudecode orchestration state
+.omc/
+
 # Node
 app/node_modules/
 
